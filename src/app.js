@@ -14,8 +14,21 @@ app.use(express.urlencoded({
     extended:true,
     limit:"16kb"
 }))// extended true means object k ander object 
-app.use(express.static("public"))// for general use
+app.use(express.static("public")) // for general use
 
 app.use(cookieParser())
+
+//router import
+import userRouter from "./routes/user.route.js"
+
+
+
+
+
+//routes decliration
+app.use("/api/v1/users",userRouter)
+
+
+
 
 export { app } 
