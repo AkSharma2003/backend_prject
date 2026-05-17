@@ -1,5 +1,5 @@
 import {asyncHandler} from "../utils/asynchandler.js"
-import {ApiError, apiError} from "../utils/apiError.js"
+import {apiError} from "../utils/apiError.js"
 import {User} from "../models/user.models.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { apiResponse } from "../utils/apiResponse.js"
@@ -17,32 +17,35 @@ const registerUser = asyncHandler(async(req,res)=>{
 
 
     const {fullname, email, username, password} = req.body
-    console.log("email: ",email)
+    // console.log("email: ",email)
 
     // cheack validation
     if(
         [fullname,email,password,username].some((field)=>field?.trim()==="")
     ){
-        throw new ApiError(400,"all field are required")
+        throw new apiError(400,"all field are required")
     }
 
-    const existedUser=await username.findOne({
+
+    const existedUser=await User.findOne({
         $or:[{username},{email}]
     })
 
     if(existedUser){
         throw new apiError(409,"user with username or email allready exists")
     }
-
-    const avtarLocalPath=req.files?.avatar[0]?.path;
-    const coverImageLocalPath=req.files?.avatar[0]?.path;
+    const avtarLocalPath=req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath=req.files?.coverImage?.[0]?.path;
 
     if(!avtarLocalPath){
-        throw new apiError (400,"Avatar file is requared")
+        throw new apiError (400,"AvatarLocal file is not created")
     }
 
     const avatar=await uploadOnCloudinary(avtarLocalPath)
-    const coverImage=await uploadOnCloudinary(coverImageLocalPath)
+    let coverImage=null
+    if(coverImageLocalPath){
+        coverImage=await uploadOnCloudinary(coverImageLocalPath)
+    }
 
     if(!avatar){
         throw new apiError (400,"Avatar file is requared")
@@ -58,15 +61,16 @@ const registerUser = asyncHandler(async(req,res)=>{
     })
 
     const createdUser=await User.findById(user._id).select(
-        "-password -refreshTocken"
+        "-password -refreshToken"
     )
 
+    // console.log(createdUser)
     if(!createdUser){
         throw new apiError(500, "somthing went wrong while registring the user")        
     }
 
     return res.status(201).json(
-        new apiResponse(200, createdUser, "User created successfully")
+        new apiResponse(201, createdUser, "User created successfully")
     )
 
 })

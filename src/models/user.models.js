@@ -1,5 +1,5 @@
 import mongoose,{ Schema } from "mongoose";
-import jwt from "JsonWebToken"
+import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 const userSchema=new Schema(
@@ -19,7 +19,7 @@ const userSchema=new Schema(
             lowercase:true,
             trim:true
         },
-        fullName:{
+        fullname:{
             type:String,
             required:true,
             trim:true,
@@ -36,10 +36,12 @@ const userSchema=new Schema(
             type:String,
             required:[true,"password is required"]
         },
-        watchHistory:{
-            type:Schema.Types.ObjectId,
-            ref:"Vidio"
-        },
+        watchHistory:[
+            {
+                type:Schema.Types.ObjectId,
+                ref:"Vidio"
+            }
+        ],
         refreshTocken:{
             type:String
         }        
@@ -47,11 +49,10 @@ const userSchema=new Schema(
     },{timestamps:true}
 )
 
-userSchema.pre("save",async function(next){
-    if(!this.isModified("password")) return next()
+userSchema.pre("save",async function(){
+    if(!this.isModified("password")) return
          
     this.password=await bcrypt.hash(this.password,10)
-    next()
 }) // this code incrept password
 
 userSchema.methods.isPasswordCorrect= async function (password){
@@ -62,10 +63,10 @@ userSchema.methods.isPasswordCorrect= async function (password){
 userSchema.methods.generateAccessTocken=function(){
     return jwt.sign(
         {
-            _id=this._id,
-            email=this.email,
-            username=this.username,
-            fullName=this.fullName
+            _id: this._id,
+            email: this.email,
+            username: this.username,
+            fullname: this.fullname
         },
         process.env.ACCESS_TOCKEN_SECRATE,
         {
@@ -77,7 +78,7 @@ userSchema.methods.generateAccessTocken=function(){
 userSchema.methods.generateRefrashTocken=function(){
     return jwt.sign(
         {
-            _id=this._id,
+            _id:this._id,
         },
         process.env.REFRESH_TOCKEN_SECRATE,
         {
