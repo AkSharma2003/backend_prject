@@ -22,9 +22,6 @@ app.use(cookieParser())
 import userRouter from "./routes/user.route.js"
 
 
-
-
-
 //routes decliration
 app.use("/api/v1/users",userRouter)
 

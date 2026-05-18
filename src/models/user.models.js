@@ -42,7 +42,7 @@ const userSchema=new Schema(
                 ref:"Vidio"
             }
         ],
-        refreshTocken:{
+        refreshToken:{
             type:String
         }        
 
@@ -60,7 +60,7 @@ userSchema.methods.isPasswordCorrect= async function (password){
     
 }
 
-userSchema.methods.generateAccessTocken=function(){
+userSchema.methods.generateAccessToken=function(){
     return jwt.sign(
         {
             _id: this._id,
@@ -68,21 +68,21 @@ userSchema.methods.generateAccessTocken=function(){
             username: this.username,
             fullname: this.fullname
         },
-        process.env.ACCESS_TOCKEN_SECRATE,
+        process.env.ACCESS_TOKEN_SECRATE,
         {
-            expiresIn:process.env.ACCESS_TOCKEN_EXPIRY
+            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
         }
     )
 }
 
-userSchema.methods.generateRefrashTocken=function(){
+userSchema.methods.generateRefrashToken=function(){
     return jwt.sign(
         {
             _id:this._id,
         },
-        process.env.REFRESH_TOCKEN_SECRATE,
+        process.env.REFRESH_TOKEN_SECRATE,
         {
-            expiresIn:process.env.REFRESH_TOCKEN_EXPIRY 
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
